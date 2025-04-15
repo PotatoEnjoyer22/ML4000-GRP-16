@@ -23,9 +23,14 @@ logfile="execution_log.txt"
 echo "Starting notebook execution at $(date)" > "$logfile"
 
 # Execute the Jupyter Notebook and log output
-echo "Executing $notebook..." | tee -a "$logfile"
-nohup jupyter nbconvert --to notebook --execute --inplace "$notebook" --ExecutePreprocessor.kernel_name=python3 > "$logfile" 2>&1 &
+(
+    echo "Executing $notebook..." | tee -a "$logfile"
+    jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.store_widget_state=True "$notebook" >> "$logfile" 2>&1
+    echo "Notebook execution finished at $(date)" >> "$logfile"
+    echo "DONE at $(date)" >> jupyter_pid.txt
+) &
 
-# Get process ID and store it
-echo $! > jupyter_pid.txt
+# Get process ID, record the start time and store it in jupyter_pid.txt
+pid=$!
+echo "PID: $pid  START at $(date)" > jupyter_pid.txt
 echo "Jupyter Notebook is running in background with PID $(cat jupyter_pid.txt). Logs can be found in $logfile"
